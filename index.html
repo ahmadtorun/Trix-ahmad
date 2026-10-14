@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A2A21">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#0A2A21}body{margin:0}[hidden]{display:none!important}</style>
-<title>تركس أحمد</title>
+<title>دفتر التركس</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <style>
-/* Layout: one felt card table, one column. Paper sheets hold results and numbers; felt holds inputs and actions. */
+/* Layout: one felt card table, one column. Paper sheets hold results and numbers; felt holds inputs and actions.
+   Colour roles: ivory chip = chosen, red chip = who ate the card, gold chip = who doubled it. */
 :root{
   --felt:#123A2F;
   --felt-deep:#0A2A21;
@@ -22,6 +23,7 @@
   --ink:#1B241F;
   --ink-soft:#5E6759;
   --red:#B5302A;
+  --eat:#C4443B;
   --pos:#1D6B49;
   --gold:#E0B95F;
   --on-felt:#EEF3EA;
@@ -62,29 +64,30 @@ bdi.num,.num{direction:ltr;unicode-bidi:isolate;display:inline-block;font-varian
 .brand h1{font:700 2.7rem/1.1 var(--display);letter-spacing:.01em}
 .brand .sub{color:var(--on-felt-soft);font-size:.95rem}
 .pipstrip{display:flex;gap:12px;background:var(--paper);padding:5px 14px;border-radius:9px;font-size:1.2rem;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.credit{display:flex;justify-content:center;align-items:center;gap:8px;color:var(--on-felt-soft);font-size:.95rem;padding-top:6px}
+.credit .suit{font-size:.9rem;color:var(--gold)}
 
 /* panels */
 .panel{background:var(--veil);border:1px solid var(--edge);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px}
 .panel h2{font:700 1.2rem/1.3 var(--display)}
 .lbl{font-size:.92rem;color:var(--on-felt-soft)}
+.note{font-size:.86rem;color:var(--on-felt-soft);line-height:1.5}
 .prow{display:flex;gap:10px;align-items:center}
 .seat{flex:none;width:34px;height:34px;border-radius:8px;background:var(--paper);color:var(--ink);display:grid;place-items:center;font:700 .95rem var(--display)}
 input[type=text]{width:100%;min-width:0;background:rgba(244,238,220,.08);border:1px solid rgba(238,243,234,.25);color:var(--on-felt);border-radius:10px;padding:10px 12px;font:inherit}
 input[type=text]::placeholder{color:rgba(238,243,234,.42)}
-.rowbetween{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.field{display:flex;flex-direction:column;gap:10px}
 .step{display:flex;align-items:center;gap:6px}
 .step button{width:40px;height:40px;border-radius:50%;background:var(--paper);color:var(--ink);font:700 1.3rem/1 var(--display);display:grid;place-items:center}
 .step button:disabled{opacity:.35}
 .step .sv{min-width:2.4rem;text-align:center;font:700 1.25rem var(--display)}
-.presets{display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 14px;border-radius:999px;border:1px solid var(--edge);color:var(--on-felt-soft);font-size:.9rem}
-.pill.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
-.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:start;width:100%}
-.switch .tr{flex:none;width:50px;height:30px;border-radius:999px;background:rgba(238,243,234,.2);position:relative;transition:background .2s}
-.switch .tr::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:var(--paper);transition:inset-inline-start .2s}
-.switch[aria-checked=true] .tr{background:var(--gold)}
-.switch[aria-checked=true] .tr::after{inset-inline-start:23px}
-.switch small{display:block;color:var(--on-felt-soft);font-size:.82rem}
+
+/* segmented choice (partnership, doubling, variant) */
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;background:rgba(244,238,220,.08);padding:4px;border-radius:12px}
+.seg button{min-height:46px;border-radius:9px;color:var(--on-felt-soft);font-weight:500;padding:4px 8px;line-height:1.3}
+.seg button.on{background:var(--paper);color:var(--ink);font-weight:700}
+.seg button.on.gold{background:var(--gold);color:#241C08}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:12px;padding:10px 18px;font:700 1.05rem var(--display);width:100%}
 .btn.primary{background:var(--gold);color:#241C08}
@@ -94,11 +97,31 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 .actions .btn{flex:1 1 140px}
 
-/* chips: felt = inactive, ivory = chosen */
+/* chips: felt = inactive, ivory = chosen, red = ate, gold = doubled */
 .pick4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pick5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .chip{min-height:44px;padding:6px 6px;border-radius:10px;border:1px solid var(--edge);background:rgba(244,238,220,.06);color:var(--on-felt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.pick5 .chip{padding:6px 2px;font-size:.88rem}
 .chip.on{background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:700;box-shadow:0 0 0 2px var(--gold)}
+.chip.on.eat{background:var(--eat);color:#fff;border-color:var(--eat);box-shadow:0 0 0 2px rgba(255,155,143,.55)}
+.chip.on.dbl{background:var(--gold);color:#241C08;border-color:var(--gold);box-shadow:0 0 0 2px rgba(224,185,95,.5)}
+.chip.on.nodbl{background:rgba(238,243,234,.22);color:var(--on-felt);border-color:rgba(238,243,234,.4);box-shadow:none}
 .chip.none{color:var(--on-felt-soft)}
+.tagl{display:flex;align-items:center;gap:7px;font-size:.88rem;font-weight:700}
+.tagl i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.tagl.eat i{background:var(--eat)}
+.tagl.eat{color:#FFB3AB}
+.tagl.dbl i{background:var(--gold)}
+.tagl.dbl{color:var(--gold)}
+
+/* mode cards */
+.mode{display:flex;align-items:center;gap:14px;width:100%;text-align:start;background:var(--paper);color:var(--ink);border-radius:14px;padding:14px;box-shadow:0 6px 14px rgba(0,0,0,.3)}
+.mode .mi{flex:none;width:52px;height:68px;border-radius:8px;border:1px solid var(--paper-line);display:grid;place-items:center;font-size:1.8rem;background:#FBF7EA}
+.mode .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mode b{font:700 1.15rem var(--display)}
+.mode small{color:var(--ink-soft);font-size:.86rem;line-height:1.4}
+.mode .chev{width:20px;height:20px;stroke:var(--ink-soft);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mode:active{transform:translateY(2px)}
 
 /* top bar */
 .topbar{display:flex;align-items:center;gap:12px}
@@ -113,6 +136,7 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 /* paper sheets */
 .sheet{background:var(--paper);color:var(--ink);border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.3);overflow:hidden}
 .cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .cols>*{min-width:0}
 .score .pc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px 12px}
 .score .pc+.pc{border-inline-start:1px solid var(--paper-line)}
@@ -157,6 +181,7 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 .srow .sn{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
 .srow .sp{width:3.4rem;text-align:center;font:700 .95rem var(--display);color:var(--on-felt-soft)}
 .sp.hot{color:#FF9B8F}
+.tg{font-size:.72rem;color:var(--on-felt-soft);margin-inline-start:6px;font-weight:400}
 .citem{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--edge)}
 .citem:first-of-type{border-top:0;padding-top:0}
 .ch{display:flex;align-items:center;gap:8px;font-weight:700}
@@ -189,8 +214,6 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 .stand div{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--paper-line)}
 .stand .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .stand .v{font:700 1.1rem var(--display)}
-.final .btn.ghost{border-color:var(--ink);color:var(--ink)}
-.final .btn.ghost.sm{border-color:var(--paper-line)}
 
 /* history list */
 .hitem{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--edge)}
@@ -226,21 +249,33 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 // <scoring>
 const UNIT = { dinari: 10, latsh: 15, queen: 25, king: 75 };
 const TRIX = [200, 150, 100, 50];
+const KQ = ['banat', 'king', 'latsh', 'dinari', 'trix'];
 const sum = a => a.reduce((x, y) => x + y, 0);
+const teamOf = i => i % 2; // الفريق الأول: اللاعبان 1 و3 (فهرس 0 و2) ، الفريق الثاني: 2 و4 (فهرس 1 و3)
 function partsOf(type) { return type === 'complex' ? ['banat', 'king', 'latsh', 'dinari'] : [type]; }
-function applyCard(d, c, base, doubling) {
+function applyCard(d, c, base, doubling, team) {
   if (c.t == null) return;
-  if (doubling && c.d != null && c.d !== c.t) { d[c.d] += base; d[c.t] -= base * 2; }
-  else d[c.t] -= base;
+  const hasD = doubling && c.d != null;
+  if (!team) {
+    if (hasD && c.d !== c.t) { d[c.d] += base; d[c.t] -= base * 2; }
+    else d[c.t] -= base;
+    return;
+  }
+  const tt = teamOf(c.t);
+  if (!hasD) { d[tt] -= base; return; }
+  const td = teamOf(c.d);
+  if (td !== tt) { d[td] += base; d[tt] -= base * 2; }      // أعطاها لخصم
+  else { d[td] -= base * 2; d[1 - td] += base; }             // أكلها المدبّل أو شريكه
 }
-function compute(type, data, doubling) {
-  const d = [0, 0, 0, 0];
+function compute(type, data, doubling, team) {
+  const d = team ? [0, 0] : [0, 0, 0, 0];
+  const add = (i, v) => { d[team ? teamOf(i) : i] += v; };
   partsOf(type).forEach(p => {
-    if (p === 'banat') data.queens.forEach(q => applyCard(d, q, UNIT.queen, doubling));
-    else if (p === 'king') applyCard(d, data.king, UNIT.king, doubling);
-    else if (p === 'latsh') data.tricks.forEach((c, i) => { d[i] -= c * UNIT.latsh; });
-    else if (p === 'dinari') data.dinari.forEach((c, i) => { d[i] -= c * UNIT.dinari; });
-    else if (p === 'trix') data.order.forEach((pl, r) => { d[pl] += TRIX[r]; });
+    if (p === 'banat') data.queens.forEach(q => applyCard(d, q, UNIT.queen, doubling, team));
+    else if (p === 'king') applyCard(d, data.king, UNIT.king, doubling, team);
+    else if (p === 'latsh') data.tricks.forEach((c, i) => add(i, -c * UNIT.latsh));
+    else if (p === 'dinari') data.dinari.forEach((c, i) => add(i, -c * UNIT.dinari));
+    else if (p === 'trix') data.order.forEach((pl, r) => add(pl, TRIX[r]));
   });
   return d;
 }
@@ -266,6 +301,25 @@ function initData(type) {
   });
   return data;
 }
+function quotaOf(g) {
+  if (g.mode === 'kingdoms') return KQ;
+  if (g.mode === 'complex') return g.variant === 'cc' ? ['complex', 'complex'] : ['complex', 'trix'];
+  return null;
+}
+// ترتيب الأدوار: يبدأ اللاعب المختار ثم التالي بالترتيب (1 ثم 2 ثم 3 ثم 4 ويلتف)
+function plan(g) {
+  const q = quotaOf(g);
+  if (!q) return null;
+  const start = g.start || 0;
+  const order = [0, 1, 2, 3].map(k => (start + k) % 4);
+  for (let k = 0; k < 4; k++) {
+    const o = order[k];
+    const rem = q.slice();
+    g.contracts.filter(c => c.namer === o).forEach(c => { const i = rem.indexOf(c.type); if (i >= 0) rem.splice(i, 1); });
+    if (rem.length) return { owner: o, ownerIdx: k, remaining: rem, total: q.length * 4, quota: q.length, done: false };
+  }
+  return { done: true, total: q.length * 4, quota: q.length };
+}
 // </scoring>
 
 (function () {
@@ -275,10 +329,11 @@ function initData(type) {
   const KEY_CUR = 'trix-ahmad:current:v1', KEY_HIST = 'trix-ahmad:history:v1';
   const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } };
   const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } };
+  const norm = g => { if (g) { g.mode = g.mode || 'open'; g.team = !!g.team; if (g.start == null) g.start = 0; g.variant = g.variant || 'classic'; } return g; };
 
-  let cur = load(KEY_CUR, null);
-  let hist = load(KEY_HIST, []);
-  const ui = { view: 'home', setup: { names: ['', '', '', ''], total: 20, doubling: false }, game: null, readonly: false, namer: null, entry: null, confirm: null };
+  let cur = norm(load(KEY_CUR, null));
+  let hist = load(KEY_HIST, []).map(norm);
+  const ui = { view: 'home', setup: { mode: 'open', names: ['', '', '', ''], team: false, doubling: false, variant: 'classic', start: 0 }, game: null, readonly: false, namer: null, entry: null, confirm: null };
   const app = document.getElementById('app');
 
   const TYPES = {
@@ -290,31 +345,37 @@ function initData(type) {
     complex: { name: 'كومبلكس', hint: 'بنات + ختيار + لطش + ديناري' }
   };
   const ORDER = ['banat', 'king', 'latsh', 'dinari', 'trix', 'complex'];
+  const MODES = {
+    open: { name: 'عقود مفتوحة', desc: 'بدون حد أعلى. بتسجّل العقود وحدة وحدة وبتنهي المباراة وقت ما بدك.' },
+    kingdoms: { name: 'ممالك', desc: 'القوانين الأصلية: لكل لاعب مملكة من 5 عقود، و4 ممالك.' },
+    complex: { name: 'كومبلكس', desc: 'عقدتين لكل لاعب: كلاسيك (كومبلكس + تركس) أو CC (عقدتين كومبلكس).' }
+  };
   const QSUITS = [['spade', 'blk'], ['heart', 'red'], ['diamond', 'red'], ['club', 'blk']];
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const sgn = n => n > 0 ? '+' + n : n < 0 ? '−' + (-n) : '0';
   const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : 'zero';
   const suit = (k, c) => `<svg class="suit ${c || ''}" viewBox="0 0 24 24" aria-hidden="true"><use href="#su-${k}"/></svg>`;
-  const totals = g => [0, 1, 2, 3].map(i => sum(g.contracts.map(c => c.delta[i])));
+  const teamName = (g, t) => `${g.players[t]} + ${g.players[t + 2]}`;
+  const colNames = g => g.team ? [teamName(g, 0), teamName(g, 1)] : g.players;
+  const totals = g => Array.from({ length: g.team ? 2 : 4 }, (_, i) => sum(g.contracts.map(c => c.delta[i] || 0)));
   const ranks = t => { const u = [...new Set(t)].sort((a, b) => b - a); return t.map(v => u.indexOf(v) + 1); };
   function fdate(ts) {
     try { return new Date(ts).toLocaleDateString('ar-u-nu-latn', { day: 'numeric', month: 'long' }); }
     catch (e) { return new Date(ts).toLocaleDateString(); }
   }
-
-  function tIcon(type, small) {
+  const quad = sz => `<span class="quad" ${sz ? `style="font-size:${sz}"` : ''}>${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</span>`;
+  function tIcon(type) {
     const m = {
       dinari: suit('diamond', 'red'), latsh: suit('spade', 'blk'), king: suit('heart', 'red'), trix: suit('club', 'blk'),
-      banat: '<span class="glyph blk">Q</span>',
-      complex: `<span class="quad">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</span>`
+      banat: '<span class="glyph blk">Q</span>', complex: quad()
     };
     return m[type];
   }
-  function tIconSm(type) {
-    if (type === 'complex') return `<span class="quad" style="font-size:.7em">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</span>`;
-    return tIcon(type);
-  }
+  const tIconSm = type => type === 'complex' ? quad('.7em') : tIcon(type);
+  const modeIcon = m => m === 'open' ? suit('spade', 'blk') : m === 'kingdoms' ? suit('heart', 'red') : quad('.8em');
+  const chevL = '<svg class="chev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+  const chevR = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 
   function toast(msg) {
     const t = document.getElementById('toast');
@@ -331,60 +392,82 @@ function initData(type) {
     store(KEY_HIST, hist);
   }
   const saveCur = () => store(KEY_CUR, cur);
+  const dn = (s, i) => (s.names[i] || '').trim() || 'اللاعب ' + (i + 1);
 
   /* ---------- views ---------- */
   function brand() {
     return `<header class="brand">
       <div class="pipstrip">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</div>
-      <h1>تركس أحمد</h1>
+      <h1>دفتر التركس</h1>
       <p class="sub">سجّل نقاط الجلسة عقدة بعقدة</p>
     </header>`;
   }
 
   function viewHome() {
-    const s = ui.setup;
     const resume = cur && !cur.finished ? `<section class="panel">
         <h2>مباراة قيد اللعب</h2>
+        <p class="lbl">${MODES[cur.mode].name} · ${cur.team ? 'شراكة' : 'مفرد'}</p>
         <p class="lbl">${cur.players.map(esc).join(' · ')}</p>
-        <p class="lbl">لُعبت ${cur.contracts.length} عقدة من ${cur.total}</p>
+        <p class="lbl">لُعبت ${cur.contracts.length} عقدة</p>
         <button class="btn primary" data-a="resume">متابعة المباراة</button>
       </section>` : '';
-    const names = [0, 1, 2, 3].map(i => `<div class="prow"><span class="seat">${i + 1}</span>
-        <input type="text" id="pn${i}" data-i="${i}" maxlength="14" placeholder="اللاعب ${i + 1}" value="${esc(s.names[i])}" autocomplete="off" aria-label="اسم اللاعب ${i + 1}"></div>`).join('');
-    const presets = [12, 20, 32, 50].map(n => `<button class="pill ${s.total === n ? 'on' : ''}" data-a="preset" data-v="${n}">${n}</button>`).join('');
+    const modes = Object.keys(MODES).map(k => `<button class="mode" data-a="mode" data-m="${k}"><span class="mi">${modeIcon(k)}</span>
+        <span class="mt"><b>${MODES[k].name}</b><small>${MODES[k].desc}</small></span>${chevL}</button>`).join('');
     const hl = hist.length ? `<section class="panel"><h2>مباريات سابقة</h2>${hist.map((h, i) => {
-      const t = totals(h), r = ranks(t), w = h.players.filter((p, k) => r[k] === 1).join(' و ');
-      const line = h.players.map((p, k) => `${esc(p)} <bdi class="num">${sgn(t[k])}</bdi>`).join(' · ');
-      return `<div class="hitem"><div class="inf"><b>فاز ${esc(w)}</b><small>${fdate(h.ts)} · ${h.contracts.length} عقدة${h.endedEarly ? ' (أُنهيت مبكراً)' : ''}</small><small>${line}</small></div>
+      const t = totals(h), r = ranks(t), nm = colNames(h);
+      const w = nm.filter((p, k) => r[k] === 1).join(' و ');
+      const line = nm.map((p, k) => `${esc(p)} <bdi class="num">${sgn(t[k])}</bdi>`).join(' · ');
+      return `<div class="hitem"><div class="inf"><b>فاز ${esc(w)}</b><small>${MODES[h.mode].name} · ${h.team ? 'شراكة' : 'مفرد'} · ${fdate(h.ts)} · ${h.contracts.length} عقدة${h.endedEarly ? ' (أُنهيت مبكراً)' : ''}</small><small>${line}</small></div>
         <button data-a="open" data-i="${i}">عرض</button><button data-a="del" data-i="${i}" aria-label="حذف المباراة">حذف</button></div>`;
     }).join('')}</section>` : '';
     return `${brand()}${resume}
-      <section class="panel">
-        <h2>مباراة جديدة</h2>
-        <div style="display:flex;flex-direction:column;gap:10px"><p class="lbl">اللاعبون بترتيب الجلوس</p>${names}</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div class="rowbetween"><p class="lbl">عدد العقود (حتى 50)</p>
-            <div class="step"><button data-a="tdec" aria-label="أنقص" ${s.total <= 1 ? 'disabled' : ''}>−</button><bdi class="sv num">${s.total}</bdi><button data-a="tinc" aria-label="زِد" ${s.total >= 50 ? 'disabled' : ''}>+</button></div></div>
-          <div class="presets">${presets}</div>
-        </div>
-        <button class="switch" role="switch" aria-checked="${s.doubling}" data-a="dbl"><span>تفعيل التدبيل<small>على البنات وختيار الكبة</small></span><span class="tr"></span></button>
-        <button class="btn primary" data-a="start">ابدأ المباراة</button>
-      </section>${hl}`;
+      <section class="panel"><h2>مباراة جديدة</h2><p class="lbl">اختار نوع المباراة</p><div style="display:flex;flex-direction:column;gap:10px">${modes}</div></section>
+      ${hl}<p class="credit">${suit('heart')}<span>من إعداد أحمد طرون</span></p>`;
+  }
+
+  function viewSetup() {
+    const s = ui.setup, m = s.mode;
+    const names = [0, 1, 2, 3].map(i => `<div class="prow"><span class="seat">${i + 1}</span>
+        <input type="text" id="pn${i}" data-i="${i}" maxlength="14" placeholder="اللاعب ${i + 1}" value="${esc(s.names[i])}" autocomplete="off" aria-label="اسم اللاعب ${i + 1}"></div>`).join('');
+    const team = `<div class="field"><p class="lbl">طريقة اللعب</p>
+        <div class="seg"><button class="${!s.team ? 'on' : ''}" data-a="steam" data-v="0">مفرد</button><button class="${s.team ? 'on' : ''}" data-a="steam" data-v="1">شراكة</button></div>
+        ${s.team ? '<p class="note">الفريق الأول: اللاعب 1 مع 3 · الفريق الثاني: اللاعب 2 مع 4 (بيجلسوا متقابلين). نقاط كل فريق بتنجمع.</p>' : ''}</div>`;
+    const variant = m === 'complex' ? `<div class="field"><p class="lbl">نوع الكومبلكس</p>
+        <div class="seg"><button class="${s.variant === 'classic' ? 'on' : ''}" data-a="svariant" data-v="classic">كلاسيك</button><button class="${s.variant === 'cc' ? 'on' : ''}" data-a="svariant" data-v="cc">CC</button></div>
+        <p class="note">${s.variant === 'classic' ? 'لكل لاعب عقدتين: كومبلكس وتركس، وهو بيختار الأنسب أول.' : 'لكل لاعب عقدتين كومبلكس.'}</p></div>` : '';
+    const dbl = `<div class="field"><p class="lbl">التدبيل (على البنات وختيار الكبة)</p>
+        <div class="seg"><button class="${s.doubling ? 'on gold' : ''}" data-a="sdbl" data-v="1">يوجد تدبيل</button><button class="${!s.doubling ? 'on' : ''}" data-a="sdbl" data-v="0">لا يوجد تدبيل</button></div></div>`;
+    const start = m !== 'open' ? `<div class="field"><p class="lbl">${m === 'kingdoms' ? 'مين بيبدأ بالتسمية؟' : 'مين بيبدأ؟'}</p>
+        <div class="pick4">${[0, 1, 2, 3].map(i => `<button class="chip ${s.start === i ? 'on' : ''}" data-a="sstart" data-i="${i}">${esc(dn(s, i))}</button>`).join('')}</div>
+        <p class="note">${m === 'kingdoms' ? 'بعد ما يخلص عقود مملكته بينتقل الدور للاعب التالي بالترتيب (1 ثم 2 ثم 3 ثم 4). كل لاعب عنده 5 عقود: ختيار الكبة، بنات، لطش، ديناري، تركس.' : 'بعد ما يلعب عقدتيه بينتقل الدور للاعب التالي بالترتيب (1 ثم 2 ثم 3 ثم 4).'}</p></div>` : '';
+    return `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="رجوع">${chevR}</button>
+      <div class="tt"><b>${MODES[m].name}</b><small>${MODES[m].desc}</small></div></div>
+      <section class="panel"><div class="field"><p class="lbl">اللاعبون بترتيب الجلوس</p>${names}</div>${team}${variant}${dbl}${start}
+      <button class="btn primary" data-a="start">ابدأ المباراة</button></section>`;
+  }
+
+  function tilesHtml(list, enabled) {
+    return list.map(k => `<button class="tile ${enabled ? '' : 'dim'}" data-a="type" data-k="${k}">
+        <span class="corner">${tIconSm(k)}</span><span class="big">${tIcon(k)}</span><span class="tn">${TYPES[k].name}</span><span class="th">${TYPES[k].hint}</span></button>`).join('');
   }
 
   function viewGame() {
-    const g = ui.game, t = totals(g), r = ranks(t), n = g.contracts.length;
-    const done = g.finished || n >= g.total;
-    const pct = Math.min(100, Math.round(n / g.total * 100));
-    const title = ui.readonly ? 'مباراة محفوظة · ' + fdate(g.ts) : done ? 'انتهت المباراة' : `العقدة ${n + 1} من ${g.total}`;
-    const top = `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-      <div class="tt"><b>${title}</b><div class="bar"><i style="width:${pct}%"></i></div></div></div>`;
-    const board = `<section class="sheet score"><div class="cols">${g.players.map((p, i) =>
+    const g = ui.game, t = totals(g), r = ranks(t), n = g.contracts.length, nm = colNames(g), pl = plan(g);
+    const done = g.finished || (pl && pl.done);
+    const pct = pl ? (done ? 100 : Math.round(n / pl.total * 100)) : null;
+    let title;
+    if (ui.readonly) title = 'مباراة محفوظة · ' + fdate(g.ts);
+    else if (done) title = 'انتهت المباراة';
+    else if (!pl) title = `العقدة ${n + 1}`;
+    else title = `${g.mode === 'kingdoms' ? 'المملكة' : 'الدور'} ${pl.ownerIdx + 1} من 4 · العقدة ${n + 1} من ${pl.total}`;
+    const top = `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="رجوع">${chevR}</button>
+      <div class="tt"><b>${title}</b>${pct != null ? `<div class="bar"><i style="width:${pct}%"></i></div>` : `<small>${MODES[g.mode].name} · ${g.team ? 'شراكة' : 'مفرد'}${g.doubling ? ' · التدبيل مفعّل' : ''}</small>`}</div></div>`;
+    const board = `<section class="sheet score"><div class="cols ${g.team ? 'two' : ''}">${nm.map((p, i) =>
       `<div class="pc"><span class="rk r${r[i]}">${r[i]}</span><span class="pn">${esc(p)}</span><bdi class="tot num ${cls(t[i])}">${sgn(t[i])}</bdi></div>`).join('')}</div></section>`;
 
     let mid = '';
     if (done) {
-      const sorted = g.players.map((p, i) => ({ p, v: t[i], r: r[i] })).sort((a, b) => b.v - a.v);
+      const sorted = nm.map((p, i) => ({ p, v: t[i], r: r[i] })).sort((a, b) => b.v - a.v);
       const winners = sorted.filter(x => x.r === 1).map(x => x.p).join(' و ');
       mid = `<section class="final"><h2>${ui.readonly ? 'النتيجة النهائية' : 'انتهت المباراة'}</h2>
         <div class="win">${suit('spade', 'blk')}<span>الفائز: <b>${esc(winners)}</b></span></div>
@@ -392,20 +475,25 @@ function initData(type) {
         ${ui.readonly ? '' : '<button class="btn primary" data-a="newgame">مباراة جديدة بنفس اللاعبين</button>'}
       </section>`;
     } else if (!ui.readonly) {
-      const chips = g.players.map((p, i) => `<button class="chip ${ui.namer === i ? 'on' : ''}" data-a="namer" data-i="${i}">${esc(p)}</button>`).join('');
-      const tiles = ORDER.map(k => `<button class="tile ${ui.namer == null ? 'dim' : ''}" data-a="type" data-k="${k}">
-          <span class="corner">${tIconSm(k)}</span><span class="big">${tIcon(k)}</span><span class="tn">${TYPES[k].name}</span><span class="th">${TYPES[k].hint}</span></button>`).join('');
-      mid = `<section class="panel"><h2>العقدة ${n + 1}</h2>
-        <p class="lbl">مين بيسمّي العقدة؟</p><div class="pick4">${chips}</div>
-        <p class="lbl">اختار نوع العقدة</p><div class="tiles">${tiles}</div></section>`;
+      if (!pl) {
+        const chips = g.players.map((p, i) => `<button class="chip ${ui.namer === i ? 'on' : ''}" data-a="namer" data-i="${i}">${esc(p)}</button>`).join('');
+        mid = `<section class="panel"><h2>العقدة ${n + 1}</h2>
+          <p class="lbl">مين بيسمّي العقدة؟</p><div class="pick4">${chips}</div>
+          <p class="lbl">اختار نوع العقدة</p><div class="tiles">${tilesHtml(ORDER, ui.namer != null)}</div></section>`;
+      } else {
+        const uniq = [...new Set(pl.remaining)];
+        mid = `<section class="panel"><h2>${g.mode === 'kingdoms' ? 'مملكة' : 'دور'} ${esc(g.players[pl.owner])}</h2>
+          <p class="lbl">المتبقي له ${pl.remaining.length} من ${pl.quota} عقود. اختار العقدة اللي بتناسبه.</p>
+          <div class="tiles">${tilesHtml(uniq, true)}</div></section>`;
+      }
     }
 
     const rows = g.contracts.map((c, idx) => ({ c, idx })).reverse().map(({ c, idx }) =>
       `<div class="hrow"><div class="hmeta"><span class="no num">${idx + 1}</span><span class="ty">${tIconSm(c.type)}${TYPES[c.type].name}</span><span class="by">يسمّي ${esc(g.players[c.namer])}</span></div>
-        <div class="cols hd">${c.delta.map(v => `<bdi class="num ${cls(v)}">${sgn(v)}</bdi>`).join('')}</div></div>`).join('');
-    const histSheet = `<section class="sheet"><div class="shead"><span>ورقة النقاط</span><span class="num">${n} / ${g.total}</span></div>
-      <div class="cols cnames">${g.players.map(p => `<div>${esc(p)}</div>`).join('')}</div>
-      ${rows || '<div class="empty">لسا ما انلعبت أي عقدة. اختار مين بيسمّي ونوع العقدة لتبدأ.</div>'}</section>`;
+        <div class="cols hd ${g.team ? 'two' : ''}">${c.delta.map(v => `<bdi class="num ${cls(v)}">${sgn(v)}</bdi>`).join('')}</div></div>`).join('');
+    const histSheet = `<section class="sheet"><div class="shead"><span>ورقة النقاط</span><span class="num">${n}${pl ? ' / ' + pl.total : ''}</span></div>
+      <div class="cols cnames ${g.team ? 'two' : ''}">${nm.map(p => `<div>${esc(p)}</div>`).join('')}</div>
+      ${rows || '<div class="empty">لسا ما انلعبت أي عقدة.</div>'}</section>`;
 
     const acts = !ui.readonly ? `<div class="actions">
         ${n > 0 ? '<button class="btn ghost sm" data-a="undo">تراجع عن آخر عقدة</button>' : ''}
@@ -415,7 +503,7 @@ function initData(type) {
 
   function countSection(title, key, unit, ic) {
     const g = ui.game, a = ui.entry.data[key], s = sum(a), ok = s === 13;
-    const rows = g.players.map((p, i) => `<div class="srow"><span class="sn">${esc(p)}</span>
+    const rows = g.players.map((p, i) => `<div class="srow"><span class="sn">${esc(p)}${g.team ? `<small class="tg">ف${teamOf(i) + 1}</small>` : ''}</span>
       <div class="step"><button data-a="dec" data-k="${key}" data-i="${i}" aria-label="أنقص" ${a[i] <= 0 ? 'disabled' : ''}>−</button><bdi class="sv num">${a[i]}</bdi><button data-a="inc" data-k="${key}" data-i="${i}" aria-label="زِد" ${s >= 13 ? 'disabled' : ''}>+</button></div>
       <bdi class="sp num ${a[i] ? 'hot' : ''}">${a[i] ? '−' + a[i] * unit : '0'}</bdi></div>`).join('');
     return `<section class="sect"><div class="sh"><h3>${ic}${title}</h3><span class="meter ${ok ? 'ok' : ''}">المجموع <bdi class="num">${s}</bdi> من 13</span></div>
@@ -424,24 +512,24 @@ function initData(type) {
 
   function cardPick(label, icon, key, j, c, doubling) {
     const g = ui.game;
-    const tk = g.players.map((p, i) => `<button class="chip ${c.t === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="t" data-v="${i}">${esc(p)}</button>`).join('');
+    const tk = g.players.map((p, i) => `<button class="chip eat ${c.t === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="t" data-v="${i}">${esc(p)}</button>`).join('');
     let dbl = '';
     if (doubling) {
       if (c.t == null) dbl = '<p class="mini">اختار مين أكلها لتظهر خيارات التدبيل</p>';
       else {
-        const others = g.players.map((p, i) => i).filter(i => i !== c.t);
-        dbl = `<p class="mini">مين دبّلها؟</p><div class="pick4"><button class="chip none ${c.d == null ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="-1">بدون</button>${others.map(i =>
-          `<button class="chip ${c.d === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="${i}">${esc(g.players[i])}</button>`).join('')}</div>`;
+        const list = g.team ? [0, 1, 2, 3] : [0, 1, 2, 3].filter(i => i !== c.t);
+        const chips = `<button class="chip none nodbl ${c.d == null ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="-1">بدون</button>` +
+          list.map(i => `<button class="chip dbl ${c.d === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="${i}">${esc(g.players[i])}</button>`).join('');
+        dbl = `<p class="tagl dbl"><i></i>مين دبّلها؟</p><div class="${g.team ? 'pick5' : 'pick4'}">${chips}</div>`;
       }
     }
-    return `<div class="citem"><div class="ch">${icon}<span>${label}</span></div><p class="mini">مين أكلها؟</p><div class="pick4">${tk}</div>${dbl}</div>`;
+    return `<div class="citem"><div class="ch">${icon}<span>${label}</span></div><p class="tagl eat"><i></i>مين أكلها؟</p><div class="pick4">${tk}</div>${dbl}</div>`;
   }
 
   function viewEntry() {
     const g = ui.game, e = ui.entry, dbl = g.doubling;
-    const parts = partsOf(e.type);
     let body = '';
-    parts.forEach(p => {
+    partsOf(e.type).forEach(p => {
       if (p === 'banat') body += `<section class="sect"><div class="sh"><h3><span class="glyph" style="color:var(--on-felt)">Q</span>البنات</h3><span class="meter">كل بنت −25</span></div>${
         e.data.queens.map((q, j) => cardPick('البنت ' + (j + 1), suit(QSUITS[j][0], QSUITS[j][1]), 'q', j, q, dbl)).join('')}</section>`;
       if (p === 'king') body += `<section class="sect"><div class="sh"><h3>${suit('heart', 'red')}ختيار الكبة</h3><span class="meter">−75</span></div>${cardPick('ختيار الكبة', suit('heart', 'red'), 'k', 0, e.data.king, dbl)}</section>`;
@@ -453,15 +541,15 @@ function initData(type) {
           <p class="mini">اضغط على كل لاعب بترتيب ما خلّص أوراقه</p>
           <div class="tgrid">${g.players.map((p2, i) => {
             const r = o.indexOf(i);
-            return `<button class="ptile ${r >= 0 ? 'done' : ''}" data-a="tpick" data-i="${i}"><span class="pname">${esc(p2)}</span>${r >= 0 ? `<span class="rb num">${r + 1}</span><bdi class="pts num">+${TRIX[r]}</bdi>` : '<span class="hint">لسا</span>'}</button>`;
+            return `<button class="ptile ${r >= 0 ? 'done' : ''}" data-a="tpick" data-i="${i}"><span class="pname">${esc(p2)}${g.team ? `<small class="tg">ف${teamOf(i) + 1}</small>` : ''}</span>${r >= 0 ? `<span class="rb num">${r + 1}</span><bdi class="pts num">+${TRIX[r]}</bdi>` : '<span class="hint">لسا</span>'}</button>`;
           }).join('')}</div></section>`;
       }
     });
-    const d = compute(e.type, e.data, dbl), pr = problems(e.type, e.data), ok = pr.length === 0;
-    const top = `<div class="topbar"><button class="iconbtn" data-a="back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-      <div class="tt"><b>${TYPES[e.type].name}</b><small>العقدة ${g.contracts.length + 1} · يسمّي ${esc(g.players[e.namer])}${dbl ? ' · التدبيل مفعّل' : ''}</small></div></div>`;
-    const dock = `<div class="dock"><div class="in"><div class="sheet"><div class="cols cnames">${g.players.map(p => `<div>${esc(p)}</div>`).join('')}</div>
-      <div class="cols">${d.map(v => `<div class="pc"><bdi class="tot num ${cls(v)}">${sgn(v)}</bdi></div>`).join('')}</div></div>
+    const d = compute(e.type, e.data, dbl, g.team), pr = problems(e.type, e.data), ok = pr.length === 0, nm = colNames(g);
+    const top = `<div class="topbar"><button class="iconbtn" data-a="back" aria-label="رجوع">${chevR}</button>
+      <div class="tt"><b>${TYPES[e.type].name}</b><small>العقدة ${g.contracts.length + 1} · يسمّي ${esc(g.players[e.namer])}${g.team ? ' · شراكة' : ''}${dbl ? ' · التدبيل مفعّل' : ''}</small></div></div>`;
+    const dock = `<div class="dock"><div class="in"><div class="sheet"><div class="cols cnames ${g.team ? 'two' : ''}">${nm.map(p => `<div>${esc(p)}</div>`).join('')}</div>
+      <div class="cols ${g.team ? 'two' : ''}">${d.map(v => `<div class="pc"><bdi class="tot num ${cls(v)}">${sgn(v)}</bdi></div>`).join('')}</div></div>
       <button class="btn primary" data-a="save" ${ok ? '' : 'disabled'}>سجّل العقدة</button>${ok ? '' : `<p class="why">${pr[0]}</p>`}</div></div>`;
     return `${top}${body}<div class="dockspace"></div>${dock}`;
   }
@@ -473,7 +561,8 @@ function initData(type) {
   }
 
   function render() {
-    app.innerHTML = (ui.view === 'home' ? viewHome() : ui.view === 'game' ? viewGame() : viewEntry()) + confirmHtml();
+    const v = ui.view;
+    app.innerHTML = (v === 'home' ? viewHome() : v === 'setup' ? viewSetup() : v === 'game' ? viewGame() : viewEntry()) + confirmHtml();
   }
   function go(view) { ui.view = view; render(); window.scrollTo(0, 0); }
   function ask(text, yes, fn) { ui.confirm = { text, yes, fn }; render(); }
@@ -481,7 +570,12 @@ function initData(type) {
   /* ---------- events ---------- */
   app.addEventListener('input', e => {
     const el = e.target;
-    if (el.id && el.id.indexOf('pn') === 0) ui.setup.names[+el.dataset.i] = el.value;
+    if (el.id && el.id.indexOf('pn') === 0) {
+      const i = +el.dataset.i;
+      ui.setup.names[i] = el.value;
+      const c = app.querySelector(`[data-a=sstart][data-i="${i}"]`);
+      if (c) c.textContent = el.value.trim() || 'اللاعب ' + (i + 1);
+    }
   });
 
   app.addEventListener('click', e => {
@@ -493,15 +587,17 @@ function initData(type) {
       case 'noop': return;
       case 'cno': ui.confirm = null; render(); return;
       case 'cyes': { const f = ui.confirm && ui.confirm.fn; ui.confirm = null; if (f) f(); else render(); return; }
-      case 'preset': ui.setup.total = +d.v; break;
-      case 'tinc': ui.setup.total = Math.min(50, ui.setup.total + 1); break;
-      case 'tdec': ui.setup.total = Math.max(1, ui.setup.total - 1); break;
-      case 'dbl': ui.setup.doubling = !ui.setup.doubling; break;
+      case 'mode': ui.setup.mode = d.m; go('setup'); return;
+      case 'steam': ui.setup.team = d.v === '1'; break;
+      case 'sdbl': ui.setup.doubling = d.v === '1'; break;
+      case 'svariant': ui.setup.variant = d.v; break;
+      case 'sstart': ui.setup.start = +d.i; break;
       case 'start': {
-        const players = [0, 1, 2, 3].map(i => (ui.setup.names[i] || '').trim() || 'اللاعب ' + (i + 1));
+        const s = ui.setup;
+        const players = [0, 1, 2, 3].map(i => dn(s, i));
         const begin = () => {
           if (cur && !cur.finished) archive(cur, true);
-          cur = { id: Date.now(), ts: Date.now(), players, total: ui.setup.total, doubling: ui.setup.doubling, contracts: [], finished: false };
+          cur = { id: Date.now(), ts: Date.now(), mode: s.mode, team: s.team, variant: s.variant, players, doubling: s.doubling, start: s.mode === 'open' ? 0 : s.start, contracts: [], finished: false };
           saveCur(); ui.game = cur; ui.readonly = false; ui.namer = null; go('game');
         };
         if (cur && !cur.finished && cur.contracts.length) ask('عندك مباراة قيد اللعب. بتنحفظ بالمباريات السابقة وبتبدأ مباراة جديدة؟', 'ابدأ الجديدة', begin);
@@ -516,22 +612,28 @@ function initData(type) {
         return;
       }
       case 'home':
-        if (!ui.readonly && cur && cur.finished) { cur = null; saveCur(); }
+        if (ui.view === 'game' && !ui.readonly && cur && cur.finished) { cur = null; saveCur(); }
         go('home'); return;
       case 'newgame':
-        ui.setup.names = cur.players.slice(); ui.setup.total = cur.total; ui.setup.doubling = cur.doubling;
-        cur = null; saveCur(); go('home'); return;
+        Object.assign(ui.setup, { mode: cur.mode, names: cur.players.slice(), team: cur.team, doubling: cur.doubling, variant: cur.variant || 'classic', start: cur.start || 0 });
+        cur = null; saveCur(); go('setup'); return;
       case 'namer': ui.namer = ui.namer === +d.i ? null : +d.i; break;
-      case 'type':
-        if (ui.namer == null) { toast('اختار مين بيسمّي العقدة أولاً'); return; }
-        ui.entry = { type: d.k, namer: ui.namer, data: initData(d.k) }; go('entry'); return;
+      case 'type': {
+        const pl = plan(cur);
+        const namer = pl ? pl.owner : ui.namer;
+        if (namer == null) { toast('اختار مين بيسمّي العقدة أولاً'); return; }
+        ui.entry = { type: d.k, namer, data: initData(d.k) }; go('entry'); return;
+      }
       case 'back': go('game'); return;
       case 'inc': { const arr = ent.data[d.k]; if (sum(arr) < 13) arr[+d.i]++; break; }
       case 'dec': { const arr = ent.data[d.k]; if (arr[+d.i] > 0) arr[+d.i]--; break; }
       case 'pick': {
         const c = d.k === 'q' ? ent.data.queens[+d.j] : ent.data.king, v = +d.v;
-        if (d.f === 't') { c.t = c.t === v ? null : v; if (c.d === c.t) c.d = null; if (c.t == null) c.d = null; }
-        else c.d = v < 0 ? null : (c.d === v ? null : v);
+        if (d.f === 't') {
+          c.t = c.t === v ? null : v;
+          if (c.t == null) c.d = null;
+          else if (!cur.team && c.d === c.t) c.d = null;
+        } else c.d = v < 0 ? null : (c.d === v ? null : v);
         break;
       }
       case 'tpick': {
@@ -542,9 +644,10 @@ function initData(type) {
       case 'treset': ent.data.order = []; break;
       case 'save': {
         if (problems(ent.type, ent.data).length) return;
-        const delta = compute(ent.type, ent.data, cur.doubling);
+        const delta = compute(ent.type, ent.data, cur.doubling, cur.team);
         cur.contracts.push({ type: ent.type, namer: ent.namer, data: ent.data, delta, ts: Date.now() });
-        if (cur.contracts.length >= cur.total) { cur.finished = true; archive(cur); }
+        const p = plan(cur);
+        if (p && p.done) { cur.finished = true; archive(cur); }
         saveCur(); ui.game = cur; ui.namer = null; ui.entry = null; go('game'); toast('تم تسجيل العقدة'); return;
       }
       case 'undo':
