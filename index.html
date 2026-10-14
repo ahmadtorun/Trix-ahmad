@@ -107,6 +107,13 @@ input[type=text]::placeholder{color:rgba(238,243,234,.42)}
 .chip.on.dbl{background:var(--gold);color:#241C08;border-color:var(--gold);box-shadow:0 0 0 2px rgba(224,185,95,.5)}
 .chip.on.nodbl{background:rgba(238,243,234,.22);color:var(--on-felt);border-color:rgba(238,243,234,.4);box-shadow:none}
 .chip.none{color:var(--on-felt-soft)}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+.pick2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pick3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tchip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:normal;line-height:1.25;padding:8px 6px;min-height:56px}
+.tchip small{font-size:.76rem;font-weight:400;opacity:.85}
+.srow .sn.tm{display:flex;flex-direction:column;white-space:normal;line-height:1.25}
+.srow .sn.tm small{font-size:.76rem;color:var(--on-felt-soft);font-weight:400}
 .tagl{display:flex;align-items:center;gap:7px;font-size:.88rem;font-weight:700}
 .tagl i{width:11px;height:11px;border-radius:50%;display:inline-block}
 .tagl.eat i{background:var(--eat)}
@@ -275,29 +282,31 @@ function compute(type, data, doubling, team) {
     else if (p === 'king') applyCard(d, data.king, UNIT.king, doubling, team);
     else if (p === 'latsh') data.tricks.forEach((c, i) => add(i, -c * UNIT.latsh));
     else if (p === 'dinari') data.dinari.forEach((c, i) => add(i, -c * UNIT.dinari));
-    else if (p === 'trix') data.order.forEach((pl, r) => add(pl, TRIX[r]));
+    else if (p === 'trix') data.order.forEach((pl, r) => { if (pl != null) add(pl, TRIX[r]); });
   });
   return d;
 }
-function problems(type, data) {
+// بالشراكة تُسجَّل البيانات على مستوى الفريق (0 أو 1) بدل اللاعبين:
+// بنات/ختيار: t = الفريق اللي أكل ، d = الفريق اللي دبّل ؛ لطش/ديناري: عدد لكل فريق ؛ تركس: order[مركز] = الفريق
+function problems(type, data, team) {
   const out = [];
   partsOf(type).forEach(p => {
-    if (p === 'banat' && data.queens.some(q => q.t == null)) out.push('حدد مين أكل كل بنت');
-    if (p === 'king' && data.king.t == null) out.push('حدد مين أكل ختيار الكبة');
+    if (p === 'banat' && data.queens.some(q => q.t == null)) out.push(team ? 'حدد أي فريق أكل كل بنت' : 'حدد مين أكل كل بنت');
+    if (p === 'king' && data.king.t == null) out.push(team ? 'حدد أي فريق أكل ختيار الكبة' : 'حدد مين أكل ختيار الكبة');
     if (p === 'latsh') { const r = 13 - sum(data.tricks); if (r !== 0) out.push('اللطش: المجموع لازم يكون 13'); }
     if (p === 'dinari') { const r = 13 - sum(data.dinari); if (r !== 0) out.push('الديناري: المجموع لازم يكون 13'); }
-    if (p === 'trix' && data.order.length < 4) out.push('حدد ترتيب انتهاء اللاعبين الأربعة');
+    if (p === 'trix' && (data.order.length < 4 || data.order.some(x => x == null))) out.push(team ? 'حدد الفريق لكل مركز من المراكز الأربعة' : 'حدد ترتيب انتهاء اللاعبين الأربعة');
   });
   return out;
 }
-function initData(type) {
-  const data = {};
+function initData(type, team) {
+  const data = {}, n = team ? 2 : 4;
   partsOf(type).forEach(p => {
     if (p === 'banat') data.queens = [0, 1, 2, 3].map(() => ({ t: null, d: null }));
     if (p === 'king') data.king = { t: null, d: null };
-    if (p === 'latsh') data.tricks = [0, 0, 0, 0];
-    if (p === 'dinari') data.dinari = [0, 0, 0, 0];
-    if (p === 'trix') data.order = [];
+    if (p === 'latsh') data.tricks = Array(n).fill(0);
+    if (p === 'dinari') data.dinari = Array(n).fill(0);
+    if (p === 'trix') data.order = team ? [null, null, null, null] : [];
   });
   return data;
 }
@@ -501,9 +510,12 @@ function plan(g) {
     return `${top}${board}${mid}${histSheet}${acts}`;
   }
 
+  const TL = ['الأول', 'الثاني', 'الثالث', 'الرابع'];
+  const tInner = (g, t) => `<b>الفريق ${TL[t]}</b><small>${esc(g.players[t])} + ${esc(g.players[t + 2])}</small>`;
+
   function countSection(title, key, unit, ic) {
     const g = ui.game, a = ui.entry.data[key], s = sum(a), ok = s === 13;
-    const rows = g.players.map((p, i) => `<div class="srow"><span class="sn">${esc(p)}${g.team ? `<small class="tg">ف${teamOf(i) + 1}</small>` : ''}</span>
+    const rows = a.map((_, i) => `<div class="srow">${g.team ? `<span class="sn tm">${tInner(g, i)}</span>` : `<span class="sn">${esc(g.players[i])}</span>`}
       <div class="step"><button data-a="dec" data-k="${key}" data-i="${i}" aria-label="أنقص" ${a[i] <= 0 ? 'disabled' : ''}>−</button><bdi class="sv num">${a[i]}</bdi><button data-a="inc" data-k="${key}" data-i="${i}" aria-label="زِد" ${s >= 13 ? 'disabled' : ''}>+</button></div>
       <bdi class="sp num ${a[i] ? 'hot' : ''}">${a[i] ? '−' + a[i] * unit : '0'}</bdi></div>`).join('');
     return `<section class="sect"><div class="sh"><h3>${ic}${title}</h3><span class="meter ${ok ? 'ok' : ''}">المجموع <bdi class="num">${s}</bdi> من 13</span></div>
@@ -511,19 +523,25 @@ function plan(g) {
   }
 
   function cardPick(label, icon, key, j, c, doubling) {
-    const g = ui.game;
-    const tk = g.players.map((p, i) => `<button class="chip eat ${c.t === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="t" data-v="${i}">${esc(p)}</button>`).join('');
+    const g = ui.game, tm = g.team;
+    const who = tm ? [0, 1] : [0, 1, 2, 3];
+    const chipHtml = (i, cl, f, on) => `<button class="chip ${tm ? 'tchip ' : ''}${cl} ${on ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="${f}" data-v="${i}">${tm ? tInner(g, i) : esc(g.players[i])}</button>`;
+    const tk = who.map(i => chipHtml(i, 'eat', 't', c.t === i)).join('');
     let dbl = '';
     if (doubling) {
-      if (c.t == null) dbl = '<p class="mini">اختار مين أكلها لتظهر خيارات التدبيل</p>';
+      if (c.t == null) dbl = `<p class="mini">اختار ${tm ? 'أي فريق' : 'مين'} أكلها لتظهر خيارات التدبيل</p>`;
       else {
-        const list = g.team ? [0, 1, 2, 3] : [0, 1, 2, 3].filter(i => i !== c.t);
-        const chips = `<button class="chip none nodbl ${c.d == null ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="-1">بدون</button>` +
-          list.map(i => `<button class="chip dbl ${c.d === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="${i}">${esc(g.players[i])}</button>`).join('');
-        dbl = `<p class="tagl dbl"><i></i>مين دبّلها؟</p><div class="${g.team ? 'pick5' : 'pick4'}">${chips}</div>`;
+        const list = tm ? [0, 1] : who.filter(i => i !== c.t);
+        const chips = `<button class="chip none nodbl ${tm ? 'tchip ' : ''}${c.d == null ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="-1">بدون</button>` +
+          list.map(i => chipHtml(i, 'dbl', 'd', c.d === i)).join('');
+        let hint = '';
+        if (tm && c.d != null) hint = c.d === c.t
+          ? '<p class="mini">الفريق دبّلها وأكلها بنفسه: بتنحسب عليه مدبّلة وللخصم نقاط إضافية.</p>'
+          : '<p class="mini">الفريق المدبّل أعطاها للخصم: نقاط إضافية للمدبّل وبتنحسب على الخصم مدبّلة.</p>';
+        dbl = `<p class="tagl dbl"><i></i>${tm ? 'أي فريق دبّلها؟' : 'مين دبّلها؟'}</p><div class="${tm ? 'pick3' : 'pick4'}">${chips}</div>${hint}`;
       }
     }
-    return `<div class="citem"><div class="ch">${icon}<span>${label}</span></div><p class="tagl eat"><i></i>مين أكلها؟</p><div class="pick4">${tk}</div>${dbl}</div>`;
+    return `<div class="citem"><div class="ch">${icon}<span>${label}</span></div><p class="tagl eat"><i></i>${tm ? 'أي فريق أكلها؟' : 'مين أكلها؟'}</p><div class="${tm ? 'pick2' : 'pick4'}">${tk}</div>${dbl}</div>`;
   }
 
   function viewEntry() {
@@ -535,7 +553,12 @@ function plan(g) {
       if (p === 'king') body += `<section class="sect"><div class="sh"><h3>${suit('heart', 'red')}ختيار الكبة</h3><span class="meter">−75</span></div>${cardPick('ختيار الكبة', suit('heart', 'red'), 'k', 0, e.data.king, dbl)}</section>`;
       if (p === 'latsh') body += countSection('اللطش', 'tricks', UNIT.latsh, suit('spade', 'blk'));
       if (p === 'dinari') body += countSection('الديناري', 'dinari', UNIT.dinari, suit('diamond', 'red'));
-      if (p === 'trix') {
+      if (p === 'trix' && g.team) {
+        const o = e.data.order, cnt = t => o.filter(x => x === t).length;
+        body += `<section class="sect"><div class="sh"><h3>${suit('club', 'blk')}ترتيب الانتهاء</h3><button class="pill" data-a="treset">إعادة</button></div>
+          <p class="mini">اختار أي فريق خلّص كل مركز (كل فريق إله مركزين)</p>${[0, 1, 2, 3].map(r => `<div class="citem"><div class="ch"><span>المركز ${TL[r]}</span><bdi class="mini num">+${TRIX[r]}</bdi></div>
+          <div class="pick2">${[0, 1].map(t => `<button class="chip tchip ${o[r] === t ? 'on' : ''}" data-a="trk" data-r="${r}" data-v="${t}" ${o[r] !== t && cnt(t) >= 2 ? 'disabled' : ''}>${tInner(g, t)}</button>`).join('')}</div></div>`).join('')}</section>`;
+      } else if (p === 'trix') {
         const o = e.data.order;
         body += `<section class="sect"><div class="sh"><h3>${suit('club', 'blk')}ترتيب الانتهاء</h3><button class="pill" data-a="treset">إعادة</button></div>
           <p class="mini">اضغط على كل لاعب بترتيب ما خلّص أوراقه</p>
@@ -545,7 +568,7 @@ function plan(g) {
           }).join('')}</div></section>`;
       }
     });
-    const d = compute(e.type, e.data, dbl, g.team), pr = problems(e.type, e.data), ok = pr.length === 0, nm = colNames(g);
+    const d = compute(e.type, e.data, dbl, g.team), pr = problems(e.type, e.data, g.team), ok = pr.length === 0, nm = colNames(g);
     const top = `<div class="topbar"><button class="iconbtn" data-a="back" aria-label="رجوع">${chevR}</button>
       <div class="tt"><b>${TYPES[e.type].name}</b><small>العقدة ${g.contracts.length + 1} · يسمّي ${esc(g.players[e.namer])}${g.team ? ' · شراكة' : ''}${dbl ? ' · التدبيل مفعّل' : ''}</small></div></div>`;
     const dock = `<div class="dock"><div class="in"><div class="sheet"><div class="cols cnames ${g.team ? 'two' : ''}">${nm.map(p => `<div>${esc(p)}</div>`).join('')}</div>
@@ -622,7 +645,7 @@ function plan(g) {
         const pl = plan(cur);
         const namer = pl ? pl.owner : ui.namer;
         if (namer == null) { toast('اختار مين بيسمّي العقدة أولاً'); return; }
-        ui.entry = { type: d.k, namer, data: initData(d.k) }; go('entry'); return;
+        ui.entry = { type: d.k, namer, data: initData(d.k, cur.team) }; go('entry'); return;
       }
       case 'back': go('game'); return;
       case 'inc': { const arr = ent.data[d.k]; if (sum(arr) < 13) arr[+d.i]++; break; }
@@ -641,9 +664,10 @@ function plan(g) {
         if (k >= 0) o.splice(k); else o.push(i);
         break;
       }
-      case 'treset': ent.data.order = []; break;
+      case 'trk': { const o = ent.data.order, r = +d.r, v = +d.v; o[r] = o[r] === v ? null : v; break; }
+      case 'treset': ent.data.order = cur.team ? [null, null, null, null] : []; break;
       case 'save': {
-        if (problems(ent.type, ent.data).length) return;
+        if (problems(ent.type, ent.data, cur.team).length) return;
         const delta = compute(ent.type, ent.data, cur.doubling, cur.team);
         cur.contracts.push({ type: ent.type, namer: ent.namer, data: ent.data, delta, ts: Date.now() });
         const p = plan(cur);
