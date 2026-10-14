@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A2A21">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#0A2A21}body{margin:0}[hidden]{display:none!important}</style>
+<title>تركس أحمد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+/* Layout: one felt card table, one column. Paper sheets hold results and numbers; felt holds inputs and actions. */
+:root{
+  --felt:#123A2F;
+  --felt-deep:#0A2A21;
+  --felt-hi:#1D5443;
+  --paper:#F4EEDC;
+  --paper-line:#DDD3B8;
+  --ink:#1B241F;
+  --ink-soft:#5E6759;
+  --red:#B5302A;
+  --pos:#1D6B49;
+  --gold:#E0B95F;
+  --on-felt:#EEF3EA;
+  --on-felt-soft:#A9C2B5;
+  --veil:rgba(5,26,20,.5);
+  --edge:rgba(238,243,234,.16);
+  --display:'Reem Kufi','Tajawal',system-ui,sans-serif;
+  --body:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background-color:var(--felt-deep);
+  background-image:radial-gradient(120% 70% at 50% 0%,var(--felt-hi) 0%,var(--felt) 42%,var(--felt-deep) 100%);
+  background-attachment:fixed;
+  color:var(--on-felt);
+  font:400 16px/1.55 var(--body);
+  padding-inline:16px;
+  padding-block:14px 32px;
+  direction:rtl;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+bdi.num,.num{direction:ltr;unicode-bidi:isolate;display:inline-block;font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+
+/* suits */
+.suit{width:1em;height:1em;fill:currentColor;display:inline-block;vertical-align:middle;flex:none}
+.red{color:var(--red)}
+.blk{color:var(--ink)}
+
+/* brand */
+.brand{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:10px;text-align:center}
+.brand h1{font:700 2.7rem/1.1 var(--display);letter-spacing:.01em}
+.brand .sub{color:var(--on-felt-soft);font-size:.95rem}
+.pipstrip{display:flex;gap:12px;background:var(--paper);padding:5px 14px;border-radius:9px;font-size:1.2rem;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+
+/* panels */
+.panel{background:var(--veil);border:1px solid var(--edge);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.panel h2{font:700 1.2rem/1.3 var(--display)}
+.lbl{font-size:.92rem;color:var(--on-felt-soft)}
+.prow{display:flex;gap:10px;align-items:center}
+.seat{flex:none;width:34px;height:34px;border-radius:8px;background:var(--paper);color:var(--ink);display:grid;place-items:center;font:700 .95rem var(--display)}
+input[type=text]{width:100%;min-width:0;background:rgba(244,238,220,.08);border:1px solid rgba(238,243,234,.25);color:var(--on-felt);border-radius:10px;padding:10px 12px;font:inherit}
+input[type=text]::placeholder{color:rgba(238,243,234,.42)}
+.rowbetween{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:40px;height:40px;border-radius:50%;background:var(--paper);color:var(--ink);font:700 1.3rem/1 var(--display);display:grid;place-items:center}
+.step button:disabled{opacity:.35}
+.step .sv{min-width:2.4rem;text-align:center;font:700 1.25rem var(--display)}
+.presets{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:6px 14px;border-radius:999px;border:1px solid var(--edge);color:var(--on-felt-soft);font-size:.9rem}
+.pill.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:start;width:100%}
+.switch .tr{flex:none;width:50px;height:30px;border-radius:999px;background:rgba(238,243,234,.2);position:relative;transition:background .2s}
+.switch .tr::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:var(--paper);transition:inset-inline-start .2s}
+.switch[aria-checked=true] .tr{background:var(--gold)}
+.switch[aria-checked=true] .tr::after{inset-inline-start:23px}
+.switch small{display:block;color:var(--on-felt-soft);font-size:.82rem}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:12px;padding:10px 18px;font:700 1.05rem var(--display);width:100%}
+.btn.primary{background:var(--gold);color:#241C08}
+.btn.primary:disabled{background:rgba(238,243,234,.16);color:rgba(238,243,234,.45)}
+.btn.ghost{border:1px solid var(--edge);color:var(--on-felt)}
+.btn.sm{min-height:42px;font-size:.95rem;width:auto}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions .btn{flex:1 1 140px}
+
+/* chips: felt = inactive, ivory = chosen */
+.pick4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.chip{min-height:44px;padding:6px 6px;border-radius:10px;border:1px solid var(--edge);background:rgba(244,238,220,.06);color:var(--on-felt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.chip.on{background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:700;box-shadow:0 0 0 2px var(--gold)}
+.chip.none{color:var(--on-felt-soft)}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:12px}
+.iconbtn{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--edge);display:grid;place-items:center}
+.iconbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.topbar .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.topbar b{font:700 1.15rem/1.2 var(--display)}
+.topbar small{color:var(--on-felt-soft);font-size:.88rem}
+.bar{height:6px;border-radius:99px;background:rgba(238,243,234,.16);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .3s}
+
+/* paper sheets */
+.sheet{background:var(--paper);color:var(--ink);border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.3);overflow:hidden}
+.cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols>*{min-width:0}
+.score .pc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px 12px}
+.score .pc+.pc{border-inline-start:1px solid var(--paper-line)}
+.pn{font-weight:700;font-size:.95rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tot{font:700 1.65rem/1.2 var(--display)}
+.rk{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 .78rem var(--display);background:var(--paper-line);color:var(--ink-soft)}
+.rk.r1{background:var(--gold);color:#2B2208}
+.neg{color:var(--red)}
+.pos{color:var(--pos)}
+.zero{color:var(--ink-soft)}
+.shead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:2px solid var(--ink);font:700 1rem var(--display)}
+.cnames{border-bottom:1px solid var(--paper-line);font-size:.78rem;color:var(--ink-soft);text-align:center}
+.cnames>div{padding:6px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow{padding:9px 0 9px;border-bottom:1px solid var(--paper-line)}
+.hrow:last-child{border-bottom:0}
+.hmeta{display:flex;align-items:center;gap:8px;padding:0 14px 4px;font-size:.88rem}
+.hmeta .no{font:700 .8rem var(--display);background:var(--ink);color:var(--paper);border-radius:6px;min-width:26px;text-align:center;padding:0 6px}
+.hmeta .ty{font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.hmeta .by{color:var(--ink-soft);margin-inline-start:auto}
+.hd{text-align:center;font:700 1.05rem var(--display)}
+.empty{padding:22px 14px;text-align:center;color:var(--ink-soft);font-size:.95rem}
+
+/* contract tiles (playing cards) */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{position:relative;background:var(--paper);color:var(--ink);border-radius:11px;padding:30px 6px 10px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-align:center;box-shadow:0 5px 12px rgba(0,0,0,.3);transition:transform .12s}
+.tile:active{transform:translateY(2px)}
+.tile.dim{opacity:.55}
+.tile .corner{position:absolute;top:7px;inset-inline-start:9px;font-size:1rem;display:flex;flex-direction:column;align-items:center;line-height:1}
+.tile .big{position:absolute;top:22px;inset-inline:0;display:grid;place-items:center;font-size:2.1rem;line-height:1;height:50px}
+.tile .tn{font:700 1rem/1.15 var(--display);margin-top:56px}
+.tile .th{font-size:.74rem;color:var(--ink-soft);line-height:1.25}
+.glyph{font:700 1em/1 Georgia,'Times New Roman',serif}
+.quad{display:grid;grid-template-columns:repeat(2,1em);gap:1px;font-size:.85em}
+
+/* entry */
+.sect{background:var(--veil);border:1px solid var(--edge);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.sect .sh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sect h3{font:700 1.1rem var(--display);display:flex;align-items:center;gap:8px}
+.meter{font-size:.88rem;color:var(--on-felt-soft)}
+.meter.ok{color:var(--gold);font-weight:700}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.srow .sn{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.srow .sp{width:3.4rem;text-align:center;font:700 .95rem var(--display);color:var(--on-felt-soft)}
+.sp.hot{color:#FF9B8F}
+.citem{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--edge)}
+.citem:first-of-type{border-top:0;padding-top:0}
+.ch{display:flex;align-items:center;gap:8px;font-weight:700}
+.ch .suit{font-size:1.2rem}
+.ch .suit.red{color:#FF8B80}
+.ch .suit.blk{color:var(--on-felt)}
+.mini{font-size:.84rem;color:var(--on-felt-soft)}
+.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ptile{position:relative;min-height:84px;border-radius:12px;background:rgba(244,238,220,.06);border:1px solid var(--edge);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ptile.done{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.ptile .pname{font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptile .rb{position:absolute;top:8px;inset-inline-start:8px;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#2B2208;display:grid;place-items:center;font:700 .9rem var(--display)}
+.ptile .pts{color:var(--pos);font:700 1.1rem var(--display)}
+.ptile .hint{font-size:.8rem;color:var(--on-felt-soft)}
+.dockspace{height:178px}
+.dock{position:fixed;inset-inline:0;bottom:0;background:var(--felt-deep);border-top:1px solid var(--edge);padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:5}
+.dock .in{width:100%;max-width:560px;margin-inline:auto;display:flex;flex-direction:column;gap:8px}
+.dock .sheet{box-shadow:none}
+.dock .tot{font-size:1.15rem}
+.dock .pc{display:flex;flex-direction:column;align-items:center;padding:6px 2px}
+.dock .pc+.pc{border-inline-start:1px solid var(--paper-line)}
+.why{font-size:.85rem;color:var(--gold);text-align:center}
+
+/* finished */
+.final{background:var(--paper);color:var(--ink);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 24px rgba(0,0,0,.3)}
+.final h2{font:700 1.3rem var(--display)}
+.final .win{display:flex;align-items:center;gap:10px;font-size:1.05rem}
+.final .win .suit{font-size:1.6rem}
+.stand{display:flex;flex-direction:column}
+.stand div{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--paper-line)}
+.stand .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.stand .v{font:700 1.1rem var(--display)}
+.final .btn.ghost{border-color:var(--ink);color:var(--ink)}
+.final .btn.ghost.sm{border-color:var(--paper-line)}
+
+/* history list */
+.hitem{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--edge)}
+.hitem:first-of-type{border-top:0}
+.hitem .inf{flex:1;min-width:0;display:flex;flex-direction:column}
+.hitem .inf b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hitem .inf small{color:var(--on-felt-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hitem button{padding:8px 12px;border-radius:10px;border:1px solid var(--edge);font-size:.9rem}
+
+/* modal + toast */
+.scrim{position:fixed;inset:0;background:rgba(3,16,12,.66);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20}
+.modal{width:100%;max-width:520px;background:var(--paper);color:var(--ink);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.modal p{font-size:1.05rem}
+.modal .btn.ghost{border-color:var(--ink);color:var(--ink)}
+#toast{position:fixed;inset-inline:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;z-index:30}
+#toast div{background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (min-width:480px){.tile{min-height:140px}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="su-heart" viewBox="0 0 24 24"><path d="M12 21C5 15.5 2 12 2 8.2 2 5.3 4.2 3.2 6.9 3.2c2.1 0 4 1.2 5.1 3.1 1.1-1.9 3-3.1 5.1-3.1C19.8 3.2 22 5.3 22 8.2 22 12 19 15.5 12 21z"/></symbol>
+    <symbol id="su-diamond" viewBox="0 0 24 24"><path d="M12 2l9 10-9 10-9-10z"/></symbol>
+    <symbol id="su-spade" viewBox="0 0 24 24"><path d="M12 2S3 9 3 14c0 3 2.4 4.8 4.8 4.8 1.6 0 2.9-.7 3.6-1.8-.2 2.4-1 3.9-2.9 5h7c-1.9-1.1-2.7-2.6-2.9-5 .7 1.1 2 1.8 3.6 1.8 2.4 0 4.8-1.8 4.8-4.8C21 9 12 2 12 2z"/></symbol>
+    <symbol id="su-club" viewBox="0 0 24 24"><circle cx="12" cy="7.3" r="4.4"/><circle cx="6.6" cy="14.4" r="4.4"/><circle cx="17.4" cy="14.4" r="4.4"/><path d="M12 11.5v2c0 4-1 6.5-3 8.5h6c-2-2-3-4.5-3-8.5z"/></symbol>
+  </defs>
+</svg>
+<div class="wrap" id="app"></div>
+<div id="toast" aria-live="polite"></div>
+
+<script>
+// <scoring>
+const UNIT = { dinari: 10, latsh: 15, queen: 25, king: 75 };
+const TRIX = [200, 150, 100, 50];
+const sum = a => a.reduce((x, y) => x + y, 0);
+function partsOf(type) { return type === 'complex' ? ['banat', 'king', 'latsh', 'dinari'] : [type]; }
+function applyCard(d, c, base, doubling) {
+  if (c.t == null) return;
+  if (doubling && c.d != null && c.d !== c.t) { d[c.d] += base; d[c.t] -= base * 2; }
+  else d[c.t] -= base;
+}
+function compute(type, data, doubling) {
+  const d = [0, 0, 0, 0];
+  partsOf(type).forEach(p => {
+    if (p === 'banat') data.queens.forEach(q => applyCard(d, q, UNIT.queen, doubling));
+    else if (p === 'king') applyCard(d, data.king, UNIT.king, doubling);
+    else if (p === 'latsh') data.tricks.forEach((c, i) => { d[i] -= c * UNIT.latsh; });
+    else if (p === 'dinari') data.dinari.forEach((c, i) => { d[i] -= c * UNIT.dinari; });
+    else if (p === 'trix') data.order.forEach((pl, r) => { d[pl] += TRIX[r]; });
+  });
+  return d;
+}
+function problems(type, data) {
+  const out = [];
+  partsOf(type).forEach(p => {
+    if (p === 'banat' && data.queens.some(q => q.t == null)) out.push('حدد مين أكل كل بنت');
+    if (p === 'king' && data.king.t == null) out.push('حدد مين أكل ختيار الكبة');
+    if (p === 'latsh') { const r = 13 - sum(data.tricks); if (r !== 0) out.push('اللطش: المجموع لازم يكون 13'); }
+    if (p === 'dinari') { const r = 13 - sum(data.dinari); if (r !== 0) out.push('الديناري: المجموع لازم يكون 13'); }
+    if (p === 'trix' && data.order.length < 4) out.push('حدد ترتيب انتهاء اللاعبين الأربعة');
+  });
+  return out;
+}
+function initData(type) {
+  const data = {};
+  partsOf(type).forEach(p => {
+    if (p === 'banat') data.queens = [0, 1, 2, 3].map(() => ({ t: null, d: null }));
+    if (p === 'king') data.king = { t: null, d: null };
+    if (p === 'latsh') data.tricks = [0, 0, 0, 0];
+    if (p === 'dinari') data.dinari = [0, 0, 0, 0];
+    if (p === 'trix') data.order = [];
+  });
+  return data;
+}
+// </scoring>
+
+(function () {
+  document.documentElement.setAttribute('dir', 'rtl');
+  document.documentElement.setAttribute('lang', 'ar');
+
+  const KEY_CUR = 'trix-ahmad:current:v1', KEY_HIST = 'trix-ahmad:history:v1';
+  const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } };
+  const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } };
+
+  let cur = load(KEY_CUR, null);
+  let hist = load(KEY_HIST, []);
+  const ui = { view: 'home', setup: { names: ['', '', '', ''], total: 20, doubling: false }, game: null, readonly: false, namer: null, entry: null, confirm: null };
+  const app = document.getElementById('app');
+
+  const TYPES = {
+    dinari: { name: 'ديناري', hint: 'كل ورقة −10' },
+    latsh: { name: 'لطش', hint: 'كل لطشة −15' },
+    banat: { name: 'بنات', hint: 'كل بنت −25' },
+    king: { name: 'ختيار الكبة', hint: 'من أكله −75' },
+    trix: { name: 'تركس', hint: '+200 · +150 · +100 · +50' },
+    complex: { name: 'كومبلكس', hint: 'بنات + ختيار + لطش + ديناري' }
+  };
+  const ORDER = ['banat', 'king', 'latsh', 'dinari', 'trix', 'complex'];
+  const QSUITS = [['spade', 'blk'], ['heart', 'red'], ['diamond', 'red'], ['club', 'blk']];
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const sgn = n => n > 0 ? '+' + n : n < 0 ? '−' + (-n) : '0';
+  const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : 'zero';
+  const suit = (k, c) => `<svg class="suit ${c || ''}" viewBox="0 0 24 24" aria-hidden="true"><use href="#su-${k}"/></svg>`;
+  const totals = g => [0, 1, 2, 3].map(i => sum(g.contracts.map(c => c.delta[i])));
+  const ranks = t => { const u = [...new Set(t)].sort((a, b) => b - a); return t.map(v => u.indexOf(v) + 1); };
+  function fdate(ts) {
+    try { return new Date(ts).toLocaleDateString('ar-u-nu-latn', { day: 'numeric', month: 'long' }); }
+    catch (e) { return new Date(ts).toLocaleDateString(); }
+  }
+
+  function tIcon(type, small) {
+    const m = {
+      dinari: suit('diamond', 'red'), latsh: suit('spade', 'blk'), king: suit('heart', 'red'), trix: suit('club', 'blk'),
+      banat: '<span class="glyph blk">Q</span>',
+      complex: `<span class="quad">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</span>`
+    };
+    return m[type];
+  }
+  function tIconSm(type) {
+    if (type === 'complex') return `<span class="quad" style="font-size:.7em">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</span>`;
+    return tIcon(type);
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.innerHTML = `<div>${esc(msg)}</div>`;
+    clearTimeout(toast.h);
+    toast.h = setTimeout(() => { t.innerHTML = ''; }, 1900);
+  }
+  function archive(g, early) {
+    const copy = JSON.parse(JSON.stringify(g));
+    if (early) { copy.finished = true; copy.endedEarly = true; }
+    const i = hist.findIndex(h => h.id === copy.id);
+    if (i >= 0) hist[i] = copy; else hist.unshift(copy);
+    hist = hist.slice(0, 30);
+    store(KEY_HIST, hist);
+  }
+  const saveCur = () => store(KEY_CUR, cur);
+
+  /* ---------- views ---------- */
+  function brand() {
+    return `<header class="brand">
+      <div class="pipstrip">${suit('spade', 'blk')}${suit('heart', 'red')}${suit('diamond', 'red')}${suit('club', 'blk')}</div>
+      <h1>تركس أحمد</h1>
+      <p class="sub">سجّل نقاط الجلسة عقدة بعقدة</p>
+    </header>`;
+  }
+
+  function viewHome() {
+    const s = ui.setup;
+    const resume = cur && !cur.finished ? `<section class="panel">
+        <h2>مباراة قيد اللعب</h2>
+        <p class="lbl">${cur.players.map(esc).join(' · ')}</p>
+        <p class="lbl">لُعبت ${cur.contracts.length} عقدة من ${cur.total}</p>
+        <button class="btn primary" data-a="resume">متابعة المباراة</button>
+      </section>` : '';
+    const names = [0, 1, 2, 3].map(i => `<div class="prow"><span class="seat">${i + 1}</span>
+        <input type="text" id="pn${i}" data-i="${i}" maxlength="14" placeholder="اللاعب ${i + 1}" value="${esc(s.names[i])}" autocomplete="off" aria-label="اسم اللاعب ${i + 1}"></div>`).join('');
+    const presets = [12, 20, 32, 50].map(n => `<button class="pill ${s.total === n ? 'on' : ''}" data-a="preset" data-v="${n}">${n}</button>`).join('');
+    const hl = hist.length ? `<section class="panel"><h2>مباريات سابقة</h2>${hist.map((h, i) => {
+      const t = totals(h), r = ranks(t), w = h.players.filter((p, k) => r[k] === 1).join(' و ');
+      const line = h.players.map((p, k) => `${esc(p)} <bdi class="num">${sgn(t[k])}</bdi>`).join(' · ');
+      return `<div class="hitem"><div class="inf"><b>فاز ${esc(w)}</b><small>${fdate(h.ts)} · ${h.contracts.length} عقدة${h.endedEarly ? ' (أُنهيت مبكراً)' : ''}</small><small>${line}</small></div>
+        <button data-a="open" data-i="${i}">عرض</button><button data-a="del" data-i="${i}" aria-label="حذف المباراة">حذف</button></div>`;
+    }).join('')}</section>` : '';
+    return `${brand()}${resume}
+      <section class="panel">
+        <h2>مباراة جديدة</h2>
+        <div style="display:flex;flex-direction:column;gap:10px"><p class="lbl">اللاعبون بترتيب الجلوس</p>${names}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="rowbetween"><p class="lbl">عدد العقود (حتى 50)</p>
+            <div class="step"><button data-a="tdec" aria-label="أنقص" ${s.total <= 1 ? 'disabled' : ''}>−</button><bdi class="sv num">${s.total}</bdi><button data-a="tinc" aria-label="زِد" ${s.total >= 50 ? 'disabled' : ''}>+</button></div></div>
+          <div class="presets">${presets}</div>
+        </div>
+        <button class="switch" role="switch" aria-checked="${s.doubling}" data-a="dbl"><span>تفعيل التدبيل<small>على البنات وختيار الكبة</small></span><span class="tr"></span></button>
+        <button class="btn primary" data-a="start">ابدأ المباراة</button>
+      </section>${hl}`;
+  }
+
+  function viewGame() {
+    const g = ui.game, t = totals(g), r = ranks(t), n = g.contracts.length;
+    const done = g.finished || n >= g.total;
+    const pct = Math.min(100, Math.round(n / g.total * 100));
+    const title = ui.readonly ? 'مباراة محفوظة · ' + fdate(g.ts) : done ? 'انتهت المباراة' : `العقدة ${n + 1} من ${g.total}`;
+    const top = `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="tt"><b>${title}</b><div class="bar"><i style="width:${pct}%"></i></div></div></div>`;
+    const board = `<section class="sheet score"><div class="cols">${g.players.map((p, i) =>
+      `<div class="pc"><span class="rk r${r[i]}">${r[i]}</span><span class="pn">${esc(p)}</span><bdi class="tot num ${cls(t[i])}">${sgn(t[i])}</bdi></div>`).join('')}</div></section>`;
+
+    let mid = '';
+    if (done) {
+      const sorted = g.players.map((p, i) => ({ p, v: t[i], r: r[i] })).sort((a, b) => b.v - a.v);
+      const winners = sorted.filter(x => x.r === 1).map(x => x.p).join(' و ');
+      mid = `<section class="final"><h2>${ui.readonly ? 'النتيجة النهائية' : 'انتهت المباراة'}</h2>
+        <div class="win">${suit('spade', 'blk')}<span>الفائز: <b>${esc(winners)}</b></span></div>
+        <div class="stand">${sorted.map(x => `<div><span class="rk r${x.r}">${x.r}</span><span class="nm">${esc(x.p)}</span><bdi class="v num ${cls(x.v)}">${sgn(x.v)}</bdi></div>`).join('')}</div>
+        ${ui.readonly ? '' : '<button class="btn primary" data-a="newgame">مباراة جديدة بنفس اللاعبين</button>'}
+      </section>`;
+    } else if (!ui.readonly) {
+      const chips = g.players.map((p, i) => `<button class="chip ${ui.namer === i ? 'on' : ''}" data-a="namer" data-i="${i}">${esc(p)}</button>`).join('');
+      const tiles = ORDER.map(k => `<button class="tile ${ui.namer == null ? 'dim' : ''}" data-a="type" data-k="${k}">
+          <span class="corner">${tIconSm(k)}</span><span class="big">${tIcon(k)}</span><span class="tn">${TYPES[k].name}</span><span class="th">${TYPES[k].hint}</span></button>`).join('');
+      mid = `<section class="panel"><h2>العقدة ${n + 1}</h2>
+        <p class="lbl">مين بيسمّي العقدة؟</p><div class="pick4">${chips}</div>
+        <p class="lbl">اختار نوع العقدة</p><div class="tiles">${tiles}</div></section>`;
+    }
+
+    const rows = g.contracts.map((c, idx) => ({ c, idx })).reverse().map(({ c, idx }) =>
+      `<div class="hrow"><div class="hmeta"><span class="no num">${idx + 1}</span><span class="ty">${tIconSm(c.type)}${TYPES[c.type].name}</span><span class="by">يسمّي ${esc(g.players[c.namer])}</span></div>
+        <div class="cols hd">${c.delta.map(v => `<bdi class="num ${cls(v)}">${sgn(v)}</bdi>`).join('')}</div></div>`).join('');
+    const histSheet = `<section class="sheet"><div class="shead"><span>ورقة النقاط</span><span class="num">${n} / ${g.total}</span></div>
+      <div class="cols cnames">${g.players.map(p => `<div>${esc(p)}</div>`).join('')}</div>
+      ${rows || '<div class="empty">لسا ما انلعبت أي عقدة. اختار مين بيسمّي ونوع العقدة لتبدأ.</div>'}</section>`;
+
+    const acts = !ui.readonly ? `<div class="actions">
+        ${n > 0 ? '<button class="btn ghost sm" data-a="undo">تراجع عن آخر عقدة</button>' : ''}
+        ${!done && n > 0 ? '<button class="btn ghost sm" data-a="finish">إنهاء المباراة الآن</button>' : ''}</div>` : '';
+    return `${top}${board}${mid}${histSheet}${acts}`;
+  }
+
+  function countSection(title, key, unit, ic) {
+    const g = ui.game, a = ui.entry.data[key], s = sum(a), ok = s === 13;
+    const rows = g.players.map((p, i) => `<div class="srow"><span class="sn">${esc(p)}</span>
+      <div class="step"><button data-a="dec" data-k="${key}" data-i="${i}" aria-label="أنقص" ${a[i] <= 0 ? 'disabled' : ''}>−</button><bdi class="sv num">${a[i]}</bdi><button data-a="inc" data-k="${key}" data-i="${i}" aria-label="زِد" ${s >= 13 ? 'disabled' : ''}>+</button></div>
+      <bdi class="sp num ${a[i] ? 'hot' : ''}">${a[i] ? '−' + a[i] * unit : '0'}</bdi></div>`).join('');
+    return `<section class="sect"><div class="sh"><h3>${ic}${title}</h3><span class="meter ${ok ? 'ok' : ''}">المجموع <bdi class="num">${s}</bdi> من 13</span></div>
+      <div class="bar"><i style="width:${Math.round(s / 13 * 100)}%"></i></div>${rows}</section>`;
+  }
+
+  function cardPick(label, icon, key, j, c, doubling) {
+    const g = ui.game;
+    const tk = g.players.map((p, i) => `<button class="chip ${c.t === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="t" data-v="${i}">${esc(p)}</button>`).join('');
+    let dbl = '';
+    if (doubling) {
+      if (c.t == null) dbl = '<p class="mini">اختار مين أكلها لتظهر خيارات التدبيل</p>';
+      else {
+        const others = g.players.map((p, i) => i).filter(i => i !== c.t);
+        dbl = `<p class="mini">مين دبّلها؟</p><div class="pick4"><button class="chip none ${c.d == null ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="-1">بدون</button>${others.map(i =>
+          `<button class="chip ${c.d === i ? 'on' : ''}" data-a="pick" data-k="${key}" data-j="${j}" data-f="d" data-v="${i}">${esc(g.players[i])}</button>`).join('')}</div>`;
+      }
+    }
+    return `<div class="citem"><div class="ch">${icon}<span>${label}</span></div><p class="mini">مين أكلها؟</p><div class="pick4">${tk}</div>${dbl}</div>`;
+  }
+
+  function viewEntry() {
+    const g = ui.game, e = ui.entry, dbl = g.doubling;
+    const parts = partsOf(e.type);
+    let body = '';
+    parts.forEach(p => {
+      if (p === 'banat') body += `<section class="sect"><div class="sh"><h3><span class="glyph" style="color:var(--on-felt)">Q</span>البنات</h3><span class="meter">كل بنت −25</span></div>${
+        e.data.queens.map((q, j) => cardPick('البنت ' + (j + 1), suit(QSUITS[j][0], QSUITS[j][1]), 'q', j, q, dbl)).join('')}</section>`;
+      if (p === 'king') body += `<section class="sect"><div class="sh"><h3>${suit('heart', 'red')}ختيار الكبة</h3><span class="meter">−75</span></div>${cardPick('ختيار الكبة', suit('heart', 'red'), 'k', 0, e.data.king, dbl)}</section>`;
+      if (p === 'latsh') body += countSection('اللطش', 'tricks', UNIT.latsh, suit('spade', 'blk'));
+      if (p === 'dinari') body += countSection('الديناري', 'dinari', UNIT.dinari, suit('diamond', 'red'));
+      if (p === 'trix') {
+        const o = e.data.order;
+        body += `<section class="sect"><div class="sh"><h3>${suit('club', 'blk')}ترتيب الانتهاء</h3><button class="pill" data-a="treset">إعادة</button></div>
+          <p class="mini">اضغط على كل لاعب بترتيب ما خلّص أوراقه</p>
+          <div class="tgrid">${g.players.map((p2, i) => {
+            const r = o.indexOf(i);
+            return `<button class="ptile ${r >= 0 ? 'done' : ''}" data-a="tpick" data-i="${i}"><span class="pname">${esc(p2)}</span>${r >= 0 ? `<span class="rb num">${r + 1}</span><bdi class="pts num">+${TRIX[r]}</bdi>` : '<span class="hint">لسا</span>'}</button>`;
+          }).join('')}</div></section>`;
+      }
+    });
+    const d = compute(e.type, e.data, dbl), pr = problems(e.type, e.data), ok = pr.length === 0;
+    const top = `<div class="topbar"><button class="iconbtn" data-a="back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="tt"><b>${TYPES[e.type].name}</b><small>العقدة ${g.contracts.length + 1} · يسمّي ${esc(g.players[e.namer])}${dbl ? ' · التدبيل مفعّل' : ''}</small></div></div>`;
+    const dock = `<div class="dock"><div class="in"><div class="sheet"><div class="cols cnames">${g.players.map(p => `<div>${esc(p)}</div>`).join('')}</div>
+      <div class="cols">${d.map(v => `<div class="pc"><bdi class="tot num ${cls(v)}">${sgn(v)}</bdi></div>`).join('')}</div></div>
+      <button class="btn primary" data-a="save" ${ok ? '' : 'disabled'}>سجّل العقدة</button>${ok ? '' : `<p class="why">${pr[0]}</p>`}</div></div>`;
+    return `${top}${body}<div class="dockspace"></div>${dock}`;
+  }
+
+  function confirmHtml() {
+    if (!ui.confirm) return '';
+    return `<div class="scrim" data-a="cno"><div class="modal" role="dialog" aria-modal="true" data-a="noop"><p>${esc(ui.confirm.text)}</p>
+      <div class="actions"><button class="btn primary" data-a="cyes">${esc(ui.confirm.yes || 'تأكيد')}</button><button class="btn ghost" data-a="cno">إلغاء</button></div></div></div>`;
+  }
+
+  function render() {
+    app.innerHTML = (ui.view === 'home' ? viewHome() : ui.view === 'game' ? viewGame() : viewEntry()) + confirmHtml();
+  }
+  function go(view) { ui.view = view; render(); window.scrollTo(0, 0); }
+  function ask(text, yes, fn) { ui.confirm = { text, yes, fn }; render(); }
+
+  /* ---------- events ---------- */
+  app.addEventListener('input', e => {
+    const el = e.target;
+    if (el.id && el.id.indexOf('pn') === 0) ui.setup.names[+el.dataset.i] = el.value;
+  });
+
+  app.addEventListener('click', e => {
+    const el = e.target.closest('[data-a]');
+    if (!el) return;
+    const a = el.dataset.a, d = el.dataset;
+    const ent = ui.entry;
+    switch (a) {
+      case 'noop': return;
+      case 'cno': ui.confirm = null; render(); return;
+      case 'cyes': { const f = ui.confirm && ui.confirm.fn; ui.confirm = null; if (f) f(); else render(); return; }
+      case 'preset': ui.setup.total = +d.v; break;
+      case 'tinc': ui.setup.total = Math.min(50, ui.setup.total + 1); break;
+      case 'tdec': ui.setup.total = Math.max(1, ui.setup.total - 1); break;
+      case 'dbl': ui.setup.doubling = !ui.setup.doubling; break;
+      case 'start': {
+        const players = [0, 1, 2, 3].map(i => (ui.setup.names[i] || '').trim() || 'اللاعب ' + (i + 1));
+        const begin = () => {
+          if (cur && !cur.finished) archive(cur, true);
+          cur = { id: Date.now(), ts: Date.now(), players, total: ui.setup.total, doubling: ui.setup.doubling, contracts: [], finished: false };
+          saveCur(); ui.game = cur; ui.readonly = false; ui.namer = null; go('game');
+        };
+        if (cur && !cur.finished && cur.contracts.length) ask('عندك مباراة قيد اللعب. بتنحفظ بالمباريات السابقة وبتبدأ مباراة جديدة؟', 'ابدأ الجديدة', begin);
+        else begin();
+        return;
+      }
+      case 'resume': ui.game = cur; ui.readonly = false; ui.namer = null; go('game'); return;
+      case 'open': ui.game = hist[+d.i]; ui.readonly = true; go('game'); return;
+      case 'del': {
+        const i = +d.i;
+        ask('تحذف هالمباراة من السجل؟', 'احذف', () => { hist.splice(i, 1); store(KEY_HIST, hist); render(); });
+        return;
+      }
+      case 'home':
+        if (!ui.readonly && cur && cur.finished) { cur = null; saveCur(); }
+        go('home'); return;
+      case 'newgame':
+        ui.setup.names = cur.players.slice(); ui.setup.total = cur.total; ui.setup.doubling = cur.doubling;
+        cur = null; saveCur(); go('home'); return;
+      case 'namer': ui.namer = ui.namer === +d.i ? null : +d.i; break;
+      case 'type':
+        if (ui.namer == null) { toast('اختار مين بيسمّي العقدة أولاً'); return; }
+        ui.entry = { type: d.k, namer: ui.namer, data: initData(d.k) }; go('entry'); return;
+      case 'back': go('game'); return;
+      case 'inc': { const arr = ent.data[d.k]; if (sum(arr) < 13) arr[+d.i]++; break; }
+      case 'dec': { const arr = ent.data[d.k]; if (arr[+d.i] > 0) arr[+d.i]--; break; }
+      case 'pick': {
+        const c = d.k === 'q' ? ent.data.queens[+d.j] : ent.data.king, v = +d.v;
+        if (d.f === 't') { c.t = c.t === v ? null : v; if (c.d === c.t) c.d = null; if (c.t == null) c.d = null; }
+        else c.d = v < 0 ? null : (c.d === v ? null : v);
+        break;
+      }
+      case 'tpick': {
+        const o = ent.data.order, i = +d.i, k = o.indexOf(i);
+        if (k >= 0) o.splice(k); else o.push(i);
+        break;
+      }
+      case 'treset': ent.data.order = []; break;
+      case 'save': {
+        if (problems(ent.type, ent.data).length) return;
+        const delta = compute(ent.type, ent.data, cur.doubling);
+        cur.contracts.push({ type: ent.type, namer: ent.namer, data: ent.data, delta, ts: Date.now() });
+        if (cur.contracts.length >= cur.total) { cur.finished = true; archive(cur); }
+        saveCur(); ui.game = cur; ui.namer = null; ui.entry = null; go('game'); toast('تم تسجيل العقدة'); return;
+      }
+      case 'undo':
+        ask('تحذف آخر عقدة انسجلت؟', 'احذفها', () => {
+          cur.contracts.pop();
+          if (cur.finished) { cur.finished = false; delete cur.endedEarly; hist = hist.filter(h => h.id !== cur.id); store(KEY_HIST, hist); }
+          saveCur(); render();
+        });
+        return;
+      case 'finish':
+        ask('تنهي المباراة هلأ وتحسب النتيجة النهائية؟', 'أنهِ المباراة', () => { cur.finished = true; cur.endedEarly = true; saveCur(); archive(cur); render(); window.scrollTo(0, 0); });
+        return;
+      default: return;
+    }
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
